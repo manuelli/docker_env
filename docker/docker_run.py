@@ -8,28 +8,15 @@ import getpass
 
 MOUNT_VOLUMES = True
 
+# additional volumes to mount
 MOUNT_VOLUME_DATA = [] # [host_machine_dir, container_dest]
-
-
-SPARTAN_DIR_HOST_MACHINE = None
 hostname = socket.gethostname()
-
-
-if socket.gethostname() == "paladin-44":
-    MOUNT_VOLUME_DATA.append(["/media/hdd/data", "data"])
-    MOUNT_VOLUME_DATA.append(["/home/manuelli/data", "data_ssd"])
-    # MOUNT_VOLUME_DATA.append(["/home/manuelli/code/spartan-hardware", 'code/spartan'])
-if socket.gethostname() == "iiwa-2":
-    MOUNT_VOLUME_DATA.append(["/home/manuelli/data", "data_ssd"])
-    MOUNT_VOLUME_DATA.append(["/home/manuelli/data", "data"])
-    MOUNT_VOLUME_DATA.append(["/home/manuelli/code/spartan", 'code/spartan'])
-
 # MOUNT_VOLUME_DATA.append(["/Users/manuelli/data", "data"])
 
 if __name__=="__main__":
     user_name = getpass.getuser()
-    default_image_name = user_name + '-pdc'
-    default_container_name = user_name + '-pdc'
+    default_image_name = user_name + '-nvidia-docker'
+    default_container_name = user_name + '-nvidia-docker'
     parser = argparse.ArgumentParser()
     parser.add_argument("-i", "--image", type=str,
         help="(required) name of the image that this container is derived from", default=default_image_name)
@@ -52,19 +39,16 @@ if __name__=="__main__":
     args = parser.parse_args()
     print("running docker container derived from image %s" %args.image)
 
-    pdc_source_dir = os.path.dirname(os.getcwd())
+    code_root_dir = os.path.dirname(os.getcwd())
 
-    print("pdc_source_dir", pdc_source_dir)
+    print("code_root_dir:", code_root_dir)
     image_name = args.image
 
-    print("image_name", image_name)
+    print("image_name:", image_name)
     home_directory = '/home/' + user_name
     dense_correspondence_source_dir = os.path.join(home_directory, 'code')
 
-
-
     cwd = os.getcwd()
-    pdc_root = os.path.dirname(os.path.dirname(cwd))
 
     cmd = None
     if args.no_gpu:
@@ -83,17 +67,15 @@ if __name__=="__main__":
 
 
     if MOUNT_VOLUMES:
-        cmd += " -v %(pdc_source_dir)s:%(home_directory)s/code/pdc "  \
-            % {'pdc_source_dir': pdc_source_dir, 'home_directory': home_directory}              # mount source
+        cmd += " -v %(code_root_dir)s:%(home_directory)s/code/docker_env "  \
+            % {'code_root_dir': code_root_dir, 'home_directory': home_directory}              # mount source
         cmd += " -v ~/.ssh:%(home_directory)s/.ssh " % {'home_directory': home_directory}   # mount ssh keys
-        cmd += " -v /media:/media " #mount media
+        cmd += " -v /media:/media " # mount media
         cmd += " -v ~/.torch:%(home_directory)s/.torch " % {'home_directory': home_directory}  # mount torch folder
                                                             # where pytorch standard models (i.e. resnet34) are stored
 
     for host_dir, container_dest in MOUNT_VOLUME_DATA:
         cmd += " -v %s:%s" %(host_dir, os.path.join(home_directory, container_dest))
-
-
 
 
     cmd += " --user %s " % user_name                                                    # login as current user
@@ -111,8 +93,7 @@ if __name__=="__main__":
     if args.usb:
         cmd += " --privileged -v /dev/bus/usb:/dev/bus/usb "
 
-    cmd += " --rm " # remove the image when you exit
-
+    cmd += " --rm " # remove the container when you exit
 
     if args.entrypoint and args.entrypoint != "":
         cmd += "--entrypoint=\"%(entrypoint)s\" " % {"entrypoint": args.entrypoint}

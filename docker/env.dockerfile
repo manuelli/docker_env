@@ -49,5 +49,5 @@ COPY docker/terminator_config .config/terminator/config
 RUN cd ${USER_HOME_DIR} && echo $(pwd) && chown $USER_NAME:$USER_NAME -R .
 
 
-ENTRYPOINT bash -c "source ~/code/pdc/docker/entrypoint.sh && /bin/bash"
+ENTRYPOINT bash -c "source ~/code/docker_env/docker/entrypoint.sh && /bin/bash"
 

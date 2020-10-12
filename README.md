@@ -4,7 +4,7 @@ This repo shows an example of building a minimal docker image for development wi
 
 ## Build the Docker Image
 
-To build the docker image navi
+To build the docker image navigate to the [`docker`](docker/) subdirectory and run the `docker_build.py` script
 ```
 cd docker && python docker_build.py
 ```
@@ -15,12 +15,12 @@ The docker build is managed by the [`docker_build.py`](docker/docker_build.py) p
 
 If the build was successful then running `docker images` should show the newly built image which is named`<username>-nvidia-docker`.
 
-## Running the docker image
+## Run a docker container
 
-To run the docker go to the `docker` subfolder and run
+To run the docker container based on the docker image that was built in the previuos step navigate to the `docker` subfolder and run the `docker_run.py` script.
 
 ```
-python docker_run.py
+cd docker && python docker_run.py
 ```
 
 This should run the docker image you created in the previous step. Note that you should have full graphics capabilities inside this docker. Try running 
@@ -31,5 +31,5 @@ which should launch a new `terminator` window with a blue background. You can al
 
 ```
 glxgears
-```
+``` 
 
